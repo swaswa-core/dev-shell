@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev Shell - Feature Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+<div class="container mx-auto p-4 max-w-4xl">
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h1 class="text-3xl font-bold text-gray-800 mb-2" id="project-name">Loading...</h1>
+        <p class="text-gray-600" id="project-about"></p>
+    </div>
+
+    <div id="features-container" class="space-y-4">
+        <!-- Features will be loaded here -->
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Error Codes</h2>
+        <div id="errors-container" class="space-y-2">
+            <!-- Errors will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // Load the JSON file
+    fetch('../../../project-info.json')
+        .then(response => response.json())
+        .then(data => {
+            // Display project info
+            document.getElementById('project-name').textContent = data.name;
+            document.getElementById('project-about').textContent = data.about;
+
+            // Display features
+            const featuresContainer = document.getElementById('features-container');
+            const version = data.versions[0];
+
+            version.features.forEach(category => {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'bg-white rounded-lg shadow-md p-6';
+
+                categoryDiv.innerHTML = `
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">${category.name}</h2>
+                        <p class="text-gray-600 mb-4">${category.description}</p>
+                        <div class="flex items-center mb-4">
+                            <span class="text-sm font-medium mr-2">Status:</span>
+                            <span class="px-2 py-1 text-xs rounded ${category.done ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                                ${category.done ? 'Complete' : 'In Progress'}
+                            </span>
+                        </div>
+                    `;
+
+                // Add features
+                const featuresDiv = document.createElement('div');
+                featuresDiv.className = 'space-y-4';
+
+                category.features.forEach(feature => {
+                    const featureDiv = document.createElement('div');
+                    featureDiv.className = 'border-l-4 border-blue-500 pl-4 ml-4';
+
+                    featureDiv.innerHTML = `
+                            <h3 class="text-lg font-semibold text-gray-800">${feature.name}</h3>
+                            <p class="text-gray-600 text-sm mb-2">${feature.description}</p>
+                            <div class="flex items-center mb-2">
+                                <span class="text-sm font-medium mr-2">Status:</span>
+                                <span class="px-2 py-1 text-xs rounded ${feature.done ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                    ${feature.done ? 'Done' : 'Not Started'}
+                                </span>
+                            </div>
+                            ${feature.why_useful ? `<p class="text-sm text-blue-600 italic mb-2">Why: ${feature.why_useful}</p>` : ''}
+
+                            ${feature.params ? `
+                                <div class="mt-2">
+                                    <span class="text-sm font-medium">Parameters:</span>
+                                    <ul class="list-disc list-inside text-sm text-gray-600 ml-2">
+                                        ${feature.params.map(param =>
+                        `<li><code class="bg-gray-100 px-1">${param.name}</code> (${param.type}) - ${param.description}</li>`
+                    ).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                        `;
+
+                    featuresDiv.appendChild(featureDiv);
+                });
+
+                categoryDiv.appendChild(featuresDiv);
+                featuresContainer.appendChild(categoryDiv);
+            });
+
+            // Display errors
+            const errorsContainer = document.getElementById('errors-container');
+            version.errors.forEach(error => {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'flex items-center justify-between p-2 bg-gray-50 rounded';
+                errorDiv.innerHTML = `
+                        <div>
+                            <span class="font-mono text-red-600 font-medium">${error.code}</span>
+                            <span class="ml-2 text-gray-700">${error.message}</span>
+                        </div>
+                        <span class="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded">${error.feature}</span>
+                    `;
+                errorsContainer.appendChild(errorDiv);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading JSON:', error);
+            document.getElementById('project-name').textContent = 'Error loading data';
+            document.getElementById('project-about').textContent = 'Make sure project-info.json is in the same directory as this HTML file.';
+        });
+</script>
+</body>
+</html>
