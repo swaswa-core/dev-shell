@@ -140,8 +140,13 @@ $jvmOpts = if ($env:DEV_SHELL_JVM_OPTS) { $env:DEV_SHELL_JVM_OPTS } else { "-Xms
 # Build command arguments
 $javaArgs = @($jvmOpts -split ' ') + @("-jar", $JarFile) + $args
 
-# Launch dev-shell
-& java @javaArgs
+# Launch dev-shell  
+try {
+    & java @javaArgs
+} catch {
+    Write-Host "Error launching dev-shell: $_" -ForegroundColor Red
+    exit 1
+}
 '@
 
     Set-Content -Path $PowerShellFile -Value $psContent
@@ -177,6 +182,17 @@ java %DEV_SHELL_JVM_OPTS% -jar "%JAR_FILE%" %*
 # Update PATH environment variable
 function Update-PathEnvironment {
     Write-Status "Checking PATH environment variable..."
+
+    # Remove existing 'dev' alias from PowerShell profile if it exists
+    $profilePath = $PROFILE.CurrentUserCurrentHost
+    if (Test-Path $profilePath) {
+        $content = Get-Content $profilePath
+        $filteredContent = $content | Where-Object { $_ -notmatch "^Set-Alias\s+dev\s+" -and $_ -notmatch "^New-Alias\s+dev\s+" }
+        if ($content.Count -ne $filteredContent.Count) {
+            Write-Status "Removing existing 'dev' alias from PowerShell profile"
+            Set-Content -Path $profilePath -Value $filteredContent
+        }
+    }
 
     $currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
 

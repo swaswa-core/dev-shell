@@ -21,3 +21,14 @@ this project is 100% human-made. I am so sick with fucking AI and their bullshit
 - ONLY CREATE WHEN A CLASS WHEN ABSOLUTELY NECESSARY
 - ONLY START CODING WHEN THE DOCS IS DONE
 
+### SCREENSHOTS
+
+#### Application Startup
+![Startup](src/main/docs/startup.png)
+
+#### LS Command Demo
+![LS Command](src/main/docs/ls-command.png)
+
+#### Help Demo
+![Help Demo](src/main/docs/help-demo.png)
+

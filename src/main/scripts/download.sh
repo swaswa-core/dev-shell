@@ -103,7 +103,7 @@ fi
 JVM_OPTS="${DEV_SHELL_JVM_OPTS:--Xms256m -Xmx512m}"
 
 # Launch dev-shell
-exec java $JVM_OPTS -jar "$JAR_FILE" "$@"
+java $JVM_OPTS -jar "$JAR_FILE" "$@"
 EOF
 
     chmod +x "$script_path"
@@ -126,6 +126,12 @@ update_shell_config() {
             shell_config="$HOME/.profile"
             ;;
     esac
+
+    # Remove existing 'dev' alias if it exists
+    if grep -q "alias dev=" "$shell_config" 2>/dev/null; then
+        print_status "Removing existing 'dev' alias from $shell_config"
+        sed -i '/^alias dev=/d' "$shell_config"
+    fi
 
     # Check if PATH already contains the bin directory
     if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
