@@ -99,9 +99,8 @@ public class PrettyPromptProvider implements PromptProvider {
       // Add tree branch
       builder.append("└", DIM);
 
-      // Add directory name
-      String dirName = components.get(componentIndex);
-      builder.append(dirName, YELLOW);
+
+      builder.append("📁"+components.get(componentIndex), YELLOW);
 
       builder.append("\n");
     }
