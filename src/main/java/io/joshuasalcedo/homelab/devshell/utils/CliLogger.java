@@ -42,7 +42,8 @@ public class CliLogger {
     private static void println(String message, TextUtility.Color color){
         out.println(TextUtility.of(message)
                 .bold()
-                .color(color));
+                .color(color)
+                .format());
     }
     
     private static String formatMessage(String message, Object... args) {
