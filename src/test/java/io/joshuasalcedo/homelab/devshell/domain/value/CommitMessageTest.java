@@ -84,9 +84,10 @@ class CommitMessageTest {
     }
 
     @Test
-    void testInvalidCommitMessage_TooLong() {
-        String longMessage = "a".repeat(501);
-        assertThrows(IllegalArgumentException.class, () -> CommitMessage.of(longMessage));
+    void testValidCommitMessage_Long() {
+        String longMessage = "a".repeat(1000);
+        CommitMessage commitMessage = CommitMessage.of(longMessage);
+        assertEquals(longMessage, commitMessage.getValue());
     }
 
     @Test

@@ -67,13 +67,14 @@ class SmartCommitServiceTest {
             tempBranch.getName()
         );
 
-        // Mock behavior - getWorkingDirectoryStatus is called twice
+        // Mock behavior - getWorkingDirectoryStatus is called three times now
         doNothing().when(validationService).validateRepository(testRepository);
-        when(gitRepository.getWorkingDirectoryStatus(testRepository)).thenReturn(workingDir).thenReturn(workingDir);
+        when(gitRepository.getWorkingDirectoryStatus(testRepository)).thenReturn(workingDir).thenReturn(workingDir).thenReturn(workingDir);
         when(gitRepository.getCurrentBranch(testRepository)).thenReturn(mainBranch);
         when(gitRepository.createBranch(eq(testRepository), any(BranchName.class))).thenReturn(tempBranch);
         when(gitRepository.createCommit(eq(testRepository), any(CommitMessage.class), eq(tempBranch.getName())))
             .thenReturn(expectedCommit);
+        lenient().doNothing().when(gitRepository).stageFiles(eq(testRepository), any(List.class));
 
         // Act
         Commit result = smartCommitService.executeSmartCommit(testRepository, commitMessage);
@@ -82,9 +83,9 @@ class SmartCommitServiceTest {
         assertNotNull(result);
         assertEquals(expectedCommit, result);
         
-        // Verify workflow steps - getWorkingDirectoryStatus called twice
+        // Verify workflow steps - getWorkingDirectoryStatus called three times now
         verify(validationService).validateRepository(testRepository);
-        verify(gitRepository, times(2)).getWorkingDirectoryStatus(testRepository);
+        verify(gitRepository, times(3)).getWorkingDirectoryStatus(testRepository);
         verify(gitRepository).getCurrentBranch(testRepository);
         verify(gitRepository).createBranch(eq(testRepository), any(BranchName.class));
         verify(gitRepository).switchToBranch(testRepository, tempBranch);
