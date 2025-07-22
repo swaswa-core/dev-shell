@@ -10,7 +10,7 @@
     </parent>
     <groupId>io.joshuasalcedo.homelab</groupId>
     <artifactId>dev-shell</artifactId>
-    <version>1.0.0</version>
+    <version>0.0.1-SNAPSHOT</version>
     <name>dev-shell</name>
     <description>dev-shell</description>
     <url/>

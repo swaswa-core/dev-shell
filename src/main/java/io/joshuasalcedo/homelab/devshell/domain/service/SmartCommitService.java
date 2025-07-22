@@ -132,9 +132,10 @@ public class SmartCommitService {
                 Branch currentBranch = gitRepository.getCurrentBranch(repository);
                 gitRepository.pushBranch(repository, currentBranch);
                 logger.info("Pushed changes to remote repository");
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 logger.warn("Failed to push to remote repository", e);
-                // Don't fail the entire operation if push fails
+                // Re-throw push failures so they can be handled by the caller
+                throw e;
             }
         }
         

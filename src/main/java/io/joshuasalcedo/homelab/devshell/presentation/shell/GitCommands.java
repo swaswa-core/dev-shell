@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Scanner;
 
 /**
  * Spring Shell commands for Git operations.
@@ -110,15 +111,19 @@ public class GitCommands {
         } catch (DomainExceptions.NoRemoteRepositoryException e) {
             return "❌ Error: No remote repository configured. Cannot push changes.";
         } catch (RuntimeException e) {
-            if (e.getMessage().contains("Push failed: Git credentials not configured")) {
+            String errorMsg = e.getMessage();
+            if (errorMsg != null && (errorMsg.contains("Push failed: Git credentials not configured") || 
+                errorMsg.contains("Authentication is required") ||
+                errorMsg.contains("CredentialsProvider has been registered"))) {
                 return "❌ Push Error: Git credentials not configured.\n" +
                        "💡 To push to remote, please:\n" +
                        "   1. Configure git credentials: git config --global user.name \"Your Name\"\n" +
                        "   2. Configure git email: git config --global user.email \"your@email.com\"\n" +
                        "   3. Or use SSH keys for authentication\n" +
                        "✅ Smart commit was successful locally (changes not pushed)";
-            } else if (e.getMessage().contains("Failed to push")) {
-                return "⚠️  Smart commit successful locally, but push failed: " + e.getCause().getMessage() + 
+            } else if (errorMsg != null && (errorMsg.contains("Failed to push") || errorMsg.contains("Push failed"))) {
+                String causeMsg = e.getCause() != null ? e.getCause().getMessage() : errorMsg;
+                return "⚠️  Smart commit successful locally, but push failed: " + causeMsg + 
                        "\n💡 You can push manually later with: git push origin " + 
                        gitRepository.getCurrentBranch(findCurrentRepository()).getName();
             }
@@ -341,6 +346,92 @@ public class GitCommands {
                    "\n💡 You can also configure manually with:\n" +
                    "   git config user.name \"" + name + "\"\n" +
                    "   git config user.email \"" + email + "\"";
+        }
+    }
+
+    /**
+     * Interactive authentication setup - prompts for name and email
+     */
+    @ShellMethod(value = "Interactive git authentication setup", key = "auth")
+    public String interactiveAuth() {
+        try {
+            Repository repository = findCurrentRepository();
+            
+            // Create scanner for user input
+            Scanner scanner = new Scanner(System.in);
+            
+            System.out.println("🔐 Git Authentication Setup");
+            System.out.println("══════════════════════════════");
+            System.out.println();
+            
+            // Get current configuration if any
+            String currentAuthor = gitRepository.getConfiguredAuthor(repository);
+            if (!currentAuthor.equals("Unknown User <user@unknown.com>")) {
+                System.out.println("Current configuration: " + currentAuthor);
+                System.out.print("Do you want to update it? (y/N): ");
+                String response = scanner.nextLine().trim().toLowerCase();
+                if (!response.equals("y") && !response.equals("yes")) {
+                    return "✅ Authentication setup cancelled. Current configuration unchanged.";
+                }
+                System.out.println();
+            }
+            
+            // Prompt for name
+            System.out.print("Enter your full name: ");
+            String name = scanner.nextLine().trim();
+            
+            if (name.isEmpty()) {
+                return "❌ Name cannot be empty. Authentication setup cancelled.";
+            }
+            
+            // Prompt for email
+            System.out.print("Enter your email address: ");
+            String email = scanner.nextLine().trim();
+            
+            if (email.isEmpty()) {
+                return "❌ Email cannot be empty. Authentication setup cancelled.";
+            }
+            
+            // Basic email validation
+            if (!email.contains("@") || !email.contains(".")) {
+                return "❌ Invalid email format. Please enter a valid email address.";
+            }
+            
+            System.out.println();
+            System.out.println("Configuring git with:");
+            System.out.println("👤 Name: " + name);
+            System.out.println("📧 Email: " + email);
+            System.out.print("Proceed with configuration? (Y/n): ");
+            
+            String confirm = scanner.nextLine().trim().toLowerCase();
+            if (confirm.equals("n") || confirm.equals("no")) {
+                return "✅ Authentication setup cancelled.";
+            }
+            
+            // Configure git using the same method as the config command
+            ProcessBuilder pb1 = new ProcessBuilder("git", "config", "user.name", name);
+            pb1.directory(repository.getRootPath().toFile());
+            Process p1 = pb1.start();
+            p1.waitFor();
+            
+            ProcessBuilder pb2 = new ProcessBuilder("git", "config", "user.email", email);
+            pb2.directory(repository.getRootPath().toFile());
+            Process p2 = pb2.start();
+            p2.waitFor();
+            
+            // Verify the configuration was set
+            String configuredAuthor = gitRepository.getConfiguredAuthor(repository);
+            
+            System.out.println();
+            return String.format("✅ Git authentication configured successfully!\n" +
+                "👤 Author: %s\n" +
+                "🚀 You can now use 'commit \"message\" --push' to push to remote repositories\n" +
+                "💡 For GitHub, you may also need to set up a Personal Access Token or SSH keys", 
+                configuredAuthor);
+                
+        } catch (Exception e) {
+            logger.error("Failed to configure git authentication", e);
+            return "❌ Failed to configure git authentication: " + e.getMessage();
         }
     }
 
@@ -638,6 +729,12 @@ public class GitCommands {
                - Set your name and email for commits
                - Required for pushing to remote repositories
             
+            🔐 auth
+               Interactive authentication setup
+               - Prompts for your name and email
+               - Validates input and confirms before applying
+               - Shows current configuration if any
+            
             🏗️  git-init [name]
                Initialize new git repository
             
@@ -656,6 +753,7 @@ public class GitCommands {
                add --files "src/Main.java"     # Add specific file
                commit "Fix authentication bug"
                commit "Add new feature" --push
+               auth                            # Interactive authentication setup
                config --name "John Doe" --email "john@example.com"
                validate
                log --count 5

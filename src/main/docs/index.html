@@ -3,114 +3,431 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dev Shell - Feature Tracker</title>
+    <title>Dev Shell - Enhanced Git CLI Documentation</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .terminal {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'Courier New', monospace;
+        }
+        .sticky-nav {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+    </style>
 </head>
-<body class="bg-gray-100">
-<div class="container mx-auto p-4 max-w-4xl">
-    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h1 class="text-3xl font-bold text-gray-800 mb-2" id="project-name">Loading...</h1>
-        <p class="text-gray-600" id="project-about"></p>
-    </div>
-
-    <div id="features-container" class="space-y-4">
-        <!-- Features will be loaded here -->
-    </div>
-
-    <div class="bg-white rounded-lg shadow-md p-6 mt-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">Error Codes</h2>
-        <div id="errors-container" class="space-y-2">
-            <!-- Errors will be loaded here -->
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="gradient-bg text-white py-16">
+        <div class="container mx-auto px-4 max-w-6xl">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-5xl font-bold mb-4"><i class="fas fa-terminal mr-3"></i>Dev Shell</h1>
+                    <p class="text-xl opacity-90">An Enhanced Git CLI with Smart Commit Workflow</p>
+                    <div class="mt-6 flex gap-4">
+                        <span class="badge bg-white/20 px-3 py-1 rounded-full text-sm">Version 0.0.1-SNAPSHOT</span>
+                        <span class="badge bg-white/20 px-3 py-1 rounded-full text-sm">Spring Boot 3.4.7</span>
+                        <span class="badge bg-white/20 px-3 py-1 rounded-full text-sm">Java 24</span>
+                    </div>
+                </div>
+                <div class="text-6xl opacity-20">
+                    <i class="fab fa-git-alt"></i>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
+    </header>
 
-<script>
-    // Load the JSON file
-    fetch('../../../project-info.json')
-        .then(response => response.json())
-        .then(data => {
-            // Display project info
-            document.getElementById('project-name').textContent = data.name;
-            document.getElementById('project-about').textContent = data.about;
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md sticky-nav">
+        <div class="container mx-auto px-4 max-w-6xl">
+            <div class="flex space-x-6 py-4">
+                <a href="#overview" class="nav-link text-gray-700 hover:text-purple-600 font-medium transition">Overview</a>
+                <a href="#installation" class="nav-link text-gray-700 hover:text-purple-600 font-medium transition">Installation</a>
+                <a href="#commands" class="nav-link text-gray-700 hover:text-purple-600 font-medium transition">Commands</a>
+                <a href="#smart-commit" class="nav-link text-gray-700 hover:text-purple-600 font-medium transition">Smart Commit</a>
+                <a href="#architecture" class="nav-link text-gray-700 hover:text-purple-600 font-medium transition">Architecture</a>
+                <a href="#configuration" class="nav-link text-gray-700 hover:text-purple-600 font-medium transition">Configuration</a>
+            </div>
+        </div>
+    </nav>
 
-            // Display features
-            const featuresContainer = document.getElementById('features-container');
-            const version = data.versions[0];
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 max-w-6xl py-12">
+        <!-- Overview Section -->
+        <section id="overview" class="mb-16">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6"><i class="fas fa-info-circle mr-2 text-purple-600"></i>Overview</h2>
+            <div class="bg-white rounded-lg shadow-lg p-8">
+                <p class="text-lg text-gray-700 mb-4">
+                    Dev Shell is a powerful command-line interface that enhances your Git workflow with intelligent features and a superior user experience. Built with Spring Shell and JGit, it provides a safer, more intuitive way to manage your Git repositories.
+                </p>
+                <div class="grid md:grid-cols-3 gap-6 mt-8">
+                    <div class="feature-card bg-purple-50 p-6 rounded-lg">
+                        <i class="fas fa-shield-alt text-3xl text-purple-600 mb-3"></i>
+                        <h3 class="font-semibold text-lg mb-2">Safe Commits</h3>
+                        <p class="text-gray-600">Automatic branch management prevents accidental commits to the wrong branch</p>
+                    </div>
+                    <div class="feature-card bg-blue-50 p-6 rounded-lg">
+                        <i class="fas fa-magic text-3xl text-blue-600 mb-3"></i>
+                        <h3 class="font-semibold text-lg mb-2">Smart Workflow</h3>
+                        <p class="text-gray-600">Intelligent commit process with file tracking and automatic staging</p>
+                    </div>
+                    <div class="feature-card bg-green-50 p-6 rounded-lg">
+                        <i class="fas fa-smile text-3xl text-green-600 mb-3"></i>
+                        <h3 class="font-semibold text-lg mb-2">Better UX</h3>
+                        <p class="text-gray-600">Emoji-enhanced output and clear status indicators for better visibility</p>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-            version.features.forEach(category => {
-                const categoryDiv = document.createElement('div');
-                categoryDiv.className = 'bg-white rounded-lg shadow-md p-6';
+        <!-- Installation Section -->
+        <section id="installation" class="mb-16">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6"><i class="fas fa-download mr-2 text-purple-600"></i>Installation</h2>
+            <div class="bg-white rounded-lg shadow-lg p-8">
+                <h3 class="text-xl font-semibold mb-4">Prerequisites</h3>
+                <ul class="list-disc list-inside text-gray-700 mb-6">
+                    <li>Java 24 or higher</li>
+                    <li>Maven 3.8+</li>
+                    <li>Git installed on your system</li>
+                </ul>
+                
+                <h3 class="text-xl font-semibold mb-4">Build and Run</h3>
+                <div class="terminal rounded-lg p-4 mb-4">
+                    <pre><code># Clone the repository
+git clone https://github.com/yourusername/dev-shell.git
+cd dev-shell
 
-                categoryDiv.innerHTML = `
-                        <h2 class="text-2xl font-bold text-gray-800 mb-2">${category.name}</h2>
-                        <p class="text-gray-600 mb-4">${category.description}</p>
-                        <div class="flex items-center mb-4">
-                            <span class="text-sm font-medium mr-2">Status:</span>
-                            <span class="px-2 py-1 text-xs rounded ${category.done ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
-                                ${category.done ? 'Complete' : 'In Progress'}
-                            </span>
+# Build the project
+./mvnw clean package
+
+# Run the application
+./mvnw spring-boot:run</code></pre>
+                </div>
+                
+                <h3 class="text-xl font-semibold mb-4">Create Executable JAR</h3>
+                <div class="terminal rounded-lg p-4">
+                    <pre><code># Build executable JAR
+./mvnw clean package
+
+# Run the JAR
+java -jar target/dev-shell-0.0.1-SNAPSHOT.jar</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Commands Section -->
+        <section id="commands" class="mb-16">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6"><i class="fas fa-terminal mr-2 text-purple-600"></i>Available Commands</h2>
+            <div class="bg-white rounded-lg shadow-lg p-8">
+                <!-- Navigation Commands -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800"><i class="fas fa-folder-open mr-2"></i>Navigation Commands</h3>
+                    <div class="space-y-4">
+                        <div class="command-card border-l-4 border-blue-500 pl-4">
+                            <code class="text-lg font-mono bg-gray-100 px-2 py-1 rounded">pwd</code>
+                            <p class="text-gray-600 mt-1">Print current working directory</p>
                         </div>
-                    `;
+                        <div class="command-card border-l-4 border-blue-500 pl-4">
+                            <code class="text-lg font-mono bg-gray-100 px-2 py-1 rounded">cd [path]</code>
+                            <p class="text-gray-600 mt-1">Change directory (supports ~, .., relative and absolute paths)</p>
+                        </div>
+                        <div class="command-card border-l-4 border-blue-500 pl-4">
+                            <code class="text-lg font-mono bg-gray-100 px-2 py-1 rounded">ls [path]</code>
+                            <p class="text-gray-600 mt-1">List directory contents with icons for files and folders</p>
+                        </div>
+                    </div>
+                </div>
 
-                // Add features
-                const featuresDiv = document.createElement('div');
-                featuresDiv.className = 'space-y-4';
-
-                category.features.forEach(feature => {
-                    const featureDiv = document.createElement('div');
-                    featureDiv.className = 'border-l-4 border-blue-500 pl-4 ml-4';
-
-                    featureDiv.innerHTML = `
-                            <h3 class="text-lg font-semibold text-gray-800">${feature.name}</h3>
-                            <p class="text-gray-600 text-sm mb-2">${feature.description}</p>
-                            <div class="flex items-center mb-2">
-                                <span class="text-sm font-medium mr-2">Status:</span>
-                                <span class="px-2 py-1 text-xs rounded ${feature.done ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
-                                    ${feature.done ? 'Done' : 'Not Started'}
-                                </span>
+                <!-- Git Commands -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800"><i class="fab fa-git-alt mr-2"></i>Git Commands</h3>
+                    <div class="space-y-4">
+                        <div class="command-card border-l-4 border-purple-500 pl-4">
+                            <code class="text-lg font-mono bg-gray-100 px-2 py-1 rounded">commit "message" [--push]</code>
+                            <p class="text-gray-600 mt-1">Execute smart commit workflow with optional push to remote</p>
+                            <div class="terminal rounded p-3 mt-2 text-sm">
+                                <pre>shell:> commit "Add new feature" --push</pre>
                             </div>
-                            ${feature.why_useful ? `<p class="text-sm text-blue-600 italic mb-2">Why: ${feature.why_useful}</p>` : ''}
-
-                            ${feature.params ? `
-                                <div class="mt-2">
-                                    <span class="text-sm font-medium">Parameters:</span>
-                                    <ul class="list-disc list-inside text-sm text-gray-600 ml-2">
-                                        ${feature.params.map(param =>
-                        `<li><code class="bg-gray-100 px-1">${param.name}</code> (${param.type}) - ${param.description}</li>`
-                    ).join('')}
-                                    </ul>
-                                </div>
-                            ` : ''}
-                        `;
-
-                    featuresDiv.appendChild(featureDiv);
-                });
-
-                categoryDiv.appendChild(featuresDiv);
-                featuresContainer.appendChild(categoryDiv);
-            });
-
-            // Display errors
-            const errorsContainer = document.getElementById('errors-container');
-            version.errors.forEach(error => {
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'flex items-center justify-between p-2 bg-gray-50 rounded';
-                errorDiv.innerHTML = `
-                        <div>
-                            <span class="font-mono text-red-600 font-medium">${error.code}</span>
-                            <span class="ml-2 text-gray-700">${error.message}</span>
                         </div>
-                        <span class="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded">${error.feature}</span>
-                    `;
-                errorsContainer.appendChild(errorDiv);
+                        <div class="command-card border-l-4 border-purple-500 pl-4">
+                            <code class="text-lg font-mono bg-gray-100 px-2 py-1 rounded">status</code>
+                            <p class="text-gray-600 mt-1">Show repository status with staged, unstaged, and untracked files</p>
+                        </div>
+                        <div class="command-card border-l-4 border-purple-500 pl-4">
+                            <code class="text-lg font-mono bg-gray-100 px-2 py-1 rounded">add [--all] [--files "file1 file2"]</code>
+                            <p class="text-gray-600 mt-1">Add untracked files to staging area</p>
+                            <div class="terminal rounded p-3 mt-2 text-sm">
+                                <pre>shell:> add --all
+shell:> add --files "src/Main.java README.md"</pre>
+                            </div>
+                        </div>
+                        <div class="command-card border-l-4 border-purple-500 pl-4">
+                            <code class="text-lg font-mono bg-gray-100 px-2 py-1 rounded">log [--count N]</code>
+                            <p class="text-gray-600 mt-1">Show recent commit history (default: 10 commits)</p>
+                        </div>
+                        <div class="command-card border-l-4 border-purple-500 pl-4">
+                            <code class="text-lg font-mono bg-gray-100 px-2 py-1 rounded">git-init [name]</code>
+                            <p class="text-gray-600 mt-1">Initialize a new Git repository</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configuration Commands -->
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800"><i class="fas fa-cog mr-2"></i>Configuration Commands</h3>
+                    <div class="space-y-4">
+                        <div class="command-card border-l-4 border-green-500 pl-4">
+                            <code class="text-lg font-mono bg-gray-100 px-2 py-1 rounded">config --name "Name" --email "email"</code>
+                            <p class="text-gray-600 mt-1">Configure Git user settings</p>
+                        </div>
+                        <div class="command-card border-l-4 border-green-500 pl-4">
+                            <code class="text-lg font-mono bg-gray-100 px-2 py-1 rounded">auth</code>
+                            <p class="text-gray-600 mt-1">Interactive authentication setup</p>
+                        </div>
+                        <div class="command-card border-l-4 border-green-500 pl-4">
+                            <code class="text-lg font-mono bg-gray-100 px-2 py-1 rounded">validate</code>
+                            <p class="text-gray-600 mt-1">Validate repository configuration and readiness</p>
+                        </div>
+                        <div class="command-card border-l-4 border-green-500 pl-4">
+                            <code class="text-lg font-mono bg-gray-100 px-2 py-1 rounded">git-help</code>
+                            <p class="text-gray-600 mt-1">Display comprehensive help information</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Smart Commit Section -->
+        <section id="smart-commit" class="mb-16">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6"><i class="fas fa-brain mr-2 text-purple-600"></i>Smart Commit Workflow</h2>
+            <div class="bg-white rounded-lg shadow-lg p-8">
+                <p class="text-lg text-gray-700 mb-6">
+                    The Smart Commit feature is the flagship capability of Dev Shell. It implements a safe, automated workflow that prevents common Git mistakes and ensures clean commit history.
+                </p>
+                
+                <h3 class="text-xl font-semibold mb-4">How It Works</h3>
+                <div class="space-y-4 mb-8">
+                    <div class="flex items-start">
+                        <span class="bg-purple-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-4 flex-shrink-0">1</span>
+                        <div>
+                            <h4 class="font-semibold">Creates Temporary Branch</h4>
+                            <p class="text-gray-600">Automatically creates a temporary branch to isolate your changes</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="bg-purple-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-4 flex-shrink-0">2</span>
+                        <div>
+                            <h4 class="font-semibold">Stages All Files</h4>
+                            <p class="text-gray-600">Automatically stages all tracked files (optionally includes untracked files)</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="bg-purple-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-4 flex-shrink-0">3</span>
+                        <div>
+                            <h4 class="font-semibold">Enhanced Commit Message</h4>
+                            <p class="text-gray-600">Appends a complete list of changed files to your commit message</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="bg-purple-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-4 flex-shrink-0">4</span>
+                        <div>
+                            <h4 class="font-semibold">Safe Merge</h4>
+                            <p class="text-gray-600">Merges the temporary branch back to your original branch</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="bg-purple-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-4 flex-shrink-0">5</span>
+                        <div>
+                            <h4 class="font-semibold">Cleanup</h4>
+                            <p class="text-gray-600">Deletes the temporary branch and optionally pushes to remote</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="text-xl font-semibold mb-4">Example Commit Message</h3>
+                <div class="terminal rounded-lg p-4">
+                    <pre>Add user authentication feature
+
+Files included in this commit:
+- src/main/java/auth/AuthService.java
+- src/main/java/auth/AuthController.java
+- src/test/java/auth/AuthServiceTest.java
+- README.md</pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Architecture Section -->
+        <section id="architecture" class="mb-16">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6"><i class="fas fa-building mr-2 text-purple-600"></i>Architecture</h2>
+            <div class="bg-white rounded-lg shadow-lg p-8">
+                <p class="text-lg text-gray-700 mb-6">
+                    Dev Shell follows Domain-Driven Design (DDD) principles with a clean, layered architecture that promotes maintainability and testability.
+                </p>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="layer-card">
+                        <h3 class="text-xl font-semibold mb-3 text-purple-700"><i class="fas fa-layer-group mr-2"></i>Domain Layer</h3>
+                        <ul class="space-y-2 text-gray-700">
+                            <li><strong>Models:</strong> Repository, Branch, Commit, WorkingDirectory</li>
+                            <li><strong>Value Objects:</strong> Author, BranchName, CommitMessage</li>
+                            <li><strong>Services:</strong> SmartCommitService, GitValidationService</li>
+                            <li><strong>Repository Interface:</strong> GitRepository</li>
+                            <li><strong>Exceptions:</strong> Custom domain exceptions with factory pattern</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="layer-card">
+                        <h3 class="text-xl font-semibold mb-3 text-blue-700"><i class="fas fa-server mr-2"></i>Infrastructure Layer</h3>
+                        <ul class="space-y-2 text-gray-700">
+                            <li><strong>JGitRepositoryAdapter:</strong> Implements GitRepository using JGit</li>
+                            <li><strong>External Libraries:</strong> JGit for Git operations</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="layer-card">
+                        <h3 class="text-xl font-semibold mb-3 text-green-700"><i class="fas fa-desktop mr-2"></i>Presentation Layer</h3>
+                        <ul class="space-y-2 text-gray-700">
+                            <li><strong>GitCommands:</strong> Spring Shell component with all CLI commands</li>
+                            <li><strong>User Interface:</strong> Terminal-based with emoji enhancements</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="layer-card">
+                        <h3 class="text-xl font-semibold mb-3 text-orange-700"><i class="fas fa-tools mr-2"></i>Technology Stack</h3>
+                        <ul class="space-y-2 text-gray-700">
+                            <li><strong>Spring Boot 3.4.7</strong> - Application framework</li>
+                            <li><strong>Spring Shell 3.4.0</strong> - CLI framework</li>
+                            <li><strong>JGit 7.3.0</strong> - Java Git implementation</li>
+                            <li><strong>Java 24</strong> - Programming language</li>
+                            <li><strong>Maven</strong> - Build tool</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Configuration Section -->
+        <section id="configuration" class="mb-16">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6"><i class="fas fa-sliders-h mr-2 text-purple-600"></i>Configuration</h2>
+            <div class="bg-white rounded-lg shadow-lg p-8">
+                <h3 class="text-xl font-semibold mb-4">Application Properties</h3>
+                <div class="terminal rounded-lg p-4 mb-6">
+                    <pre><code># Logging Configuration
+logging.file.name=${user.home}/.dev-shell/dev-shell.log
+logging.level.root=INFO
+logging.level.io.joshuasalcedo.homelab.devshell=DEBUG
+
+# Spring Shell Configuration
+spring.shell.interactive.enabled=true
+spring.main.banner-mode=off
+spring.main.web-application-type=none</code></pre>
+                </div>
+                
+                <h3 class="text-xl font-semibold mb-4">Log File Location</h3>
+                <p class="text-gray-700 mb-4">
+                    Logs are automatically saved to: <code class="bg-gray-100 px-2 py-1 rounded">~/.dev-shell/dev-shell.log</code>
+                </p>
+                
+                <h3 class="text-xl font-semibold mb-4">Maven Configuration</h3>
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                    <p class="text-blue-800">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        The project includes Maven Versions Plugin for easy dependency management. Run <code class="bg-blue-100 px-2 py-1 rounded">mvn versions:display-dependency-updates</code> to check for updates.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Error Codes Section -->
+        <section id="errors" class="mb-16">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6"><i class="fas fa-exclamation-triangle mr-2 text-purple-600"></i>Error Codes</h2>
+            <div class="bg-white rounded-lg shadow-lg p-8">
+                <p class="text-gray-700 mb-6">Dev Shell provides descriptive error messages with specific error codes for easier troubleshooting:</p>
+                <div class="space-y-3">
+                    <div class="error-item flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                        <div>
+                            <code class="font-mono text-red-600 font-semibold">REPO_NOT_FOUND</code>
+                            <span class="ml-3 text-gray-700">Repository not found at the specified path</span>
+                        </div>
+                    </div>
+                    <div class="error-item flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                        <div>
+                            <code class="font-mono text-red-600 font-semibold">INVALID_BRANCH</code>
+                            <span class="ml-3 text-gray-700">Invalid branch name or branch operation failed</span>
+                        </div>
+                    </div>
+                    <div class="error-item flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                        <div>
+                            <code class="font-mono text-red-600 font-semibold">COMMIT_FAILED</code>
+                            <span class="ml-3 text-gray-700">Commit operation failed</span>
+                        </div>
+                    </div>
+                    <div class="error-item flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                        <div>
+                            <code class="font-mono text-red-600 font-semibold">AUTH_REQUIRED</code>
+                            <span class="ml-3 text-gray-700">Git authentication not configured</span>
+                        </div>
+                    </div>
+                    <div class="error-item flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                        <div>
+                            <code class="font-mono text-red-600 font-semibold">VALIDATION_ERROR</code>
+                            <span class="ml-3 text-gray-700">Repository validation failed</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="text-center py-8 text-gray-600">
+            <p>&copy; 2025 Dev Shell. Built with ❤️ using Spring Boot and JGit</p>
+        </footer>
+    </main>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
             });
-        })
-        .catch(error => {
-            console.error('Error loading JSON:', error);
-            document.getElementById('project-name').textContent = 'Error loading data';
-            document.getElementById('project-about').textContent = 'Make sure project-info.json is in the same directory as this HTML file.';
         });
-</script>
+
+        // Highlight active section in navigation
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (scrollY >= (sectionTop - 200)) {
+                    current = section.getAttribute('id');
+                }
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('text-purple-600', 'font-bold');
+                if (link.getAttribute('href').substring(1) === current) {
+                    link.classList.add('text-purple-600', 'font-bold');
+                }
+            });
+        });
+    </script>
 </body>
 </html>
