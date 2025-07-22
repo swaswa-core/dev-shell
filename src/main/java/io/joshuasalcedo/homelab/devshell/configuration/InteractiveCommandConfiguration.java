@@ -1,7 +1,6 @@
 package io.joshuasalcedo.homelab.devshell.configuration;
 
 
-import io.joshuasalcedo.commonlibs.logging.api.Logger;
 import io.joshuasalcedo.commonlibs.text.TextUtility;
 import io.joshuasalcedo.homelab.devshell.domain.service.InteractiveCommandService;
 import io.joshuasalcedo.homelab.devshell.infrastructure.command.FileInteractiveCommandRepositoryAdapter;

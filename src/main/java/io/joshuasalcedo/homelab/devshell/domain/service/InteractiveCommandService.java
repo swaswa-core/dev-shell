@@ -4,8 +4,6 @@ package io.joshuasalcedo.homelab.devshell.domain.service;
 import io.joshuasalcedo.commonlibs.text.TextUtility;
 import io.joshuasalcedo.homelab.devshell.domain.model.InteractiveCommand;
 import io.joshuasalcedo.homelab.devshell.domain.repository.InteractiveCommandRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;

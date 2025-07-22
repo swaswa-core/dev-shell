@@ -1,6 +1,7 @@
 package io.joshuasalcedo.homelab.devshell.utils;
 
-import io.joshuasalcedo.commonlibs.logging.api.Logger;
+import io.joshuasalcedo.homelab.devshell.utils.CliLogger;
+
 import org.zeroturnaround.exec.ProcessExecutor;
 
 import java.io.File;
@@ -41,7 +42,7 @@ public class AliasSetter {
                 }
             }
         } catch (URISyntaxException | SecurityException | NullPointerException e) {
-            Logger.error("Cannot Find the JAR file: " + e.getMessage());
+            CliLogger.error("Cannot Find the JAR file: " + e.getMessage());
         }
         return null;
     }

@@ -1,10 +1,10 @@
 package io.joshuasalcedo.homelab.devshell.domain.service;
 
+import io.joshuasalcedo.homelab.devshell.utils.CliLogger;
+
 import io.joshuasalcedo.homelab.devshell.domain.exception.DomainExceptions;
 import io.joshuasalcedo.homelab.devshell.domain.model.Repository;
 import io.joshuasalcedo.homelab.devshell.domain.value.Author;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,7 +18,6 @@ import java.util.Objects;
  * @created 7/22/2025
  */
 public class GitValidationService {
-    private static final Logger logger = LoggerFactory.getLogger(GitValidationService.class);
     
     /**
      * Validates that a repository is properly initialized and accessible
@@ -31,30 +30,30 @@ public class GitValidationService {
         
         // Check if directory exists
         if (!Files.exists(repository.getRootPath())) {
-            logger.error("Repository path does not exist: {}", repository.getRootPath());
+            CliLogger.error("Repository path does not exist: {}", repository.getRootPath());
             throw new DomainExceptions.NotARepositoryException(repository.getRootPath().toString());
         }
         
         // Check if it's a directory
         if (!Files.isDirectory(repository.getRootPath())) {
-            logger.error("Repository path is not a directory: {}", repository.getRootPath());
+            CliLogger.error("Repository path is not a directory: {}", repository.getRootPath());
             throw new DomainExceptions.NotARepositoryException(repository.getRootPath().toString());
         }
         
         // Check if repository is initialized
         if (!repository.isInitialized()) {
-            logger.error("Repository is not initialized: {}", repository.getRootPath());
+            CliLogger.error("Repository is not initialized: {}", repository.getRootPath());
             throw new DomainExceptions.NotARepositoryException(repository.getRootPath().toString());
         }
         
         // Check if .git directory exists
         Path gitDir = repository.getRootPath().resolve(".git");
         if (!Files.exists(gitDir)) {
-            logger.error("Git directory not found: {}", gitDir);
+            CliLogger.error("Git directory not found: {}", gitDir);
             throw new DomainExceptions.NotARepositoryException(repository.getRootPath().toString());
         }
         
-        logger.debug("Repository validation passed for: {}", repository.getName());
+        CliLogger.debug("Repository validation passed for: {}", repository.getName());
     }
 
     /**
@@ -73,11 +72,11 @@ public class GitValidationService {
         
         // Example: Check if author name is in blocked list (placeholder for future enhancement)
         if (isBlockedUser(author.getName())) {
-            logger.error("User '{}' is not authorized to commit", author.getName());
+            CliLogger.error("User '{}' is not authorized to commit", author.getName());
             throw new DomainExceptions.UnauthorizedToCommitException(author.getName());
         }
         
-        logger.debug("Author validation passed for: {}", author.getName());
+        CliLogger.debug("Author validation passed for: {}", author.getName());
     }
 
     /**
@@ -92,11 +91,11 @@ public class GitValidationService {
         Objects.requireNonNull(remoteName, "Remote name cannot be null");
         
         if (!repository.hasRemote()) {
-            logger.error("No remote repository configured for: {}", remoteName);
+            CliLogger.error("No remote repository configured for: {}", remoteName);
             throw new DomainExceptions.NoRemoteRepositoryException(remoteName);
         }
         
-        logger.debug("Remote repository validation passed for: {}", remoteName);
+        CliLogger.debug("Remote repository validation passed for: {}", remoteName);
     }
 
     /**
@@ -115,7 +114,7 @@ public class GitValidationService {
         // Additional business rules can be added here
         // For example: check for required patterns, forbidden words, etc.
         
-        logger.debug("Commit message validation passed");
+        CliLogger.debug("Commit message validation passed");
     }
 
     /**

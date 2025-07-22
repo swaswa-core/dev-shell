@@ -191,3 +191,14 @@
 1753192803186:cd dev-shell
 1753192803589:ls
 1753192806491:commit "fix the repository"
+1753193898689:help
+1753193900830:status
+1753193990304:find . -name "*.java" -type f -exec grep -l "TextUtility" {} \\; | while read file; do\n    if ! grep -q "\\.format(" "$file" && [ "$(basename "$file")" != "CliLogger.java" ]; then\n        echo "$file"\n    fi\ndone
+1753194018952:grep -rn --include="*.java" "TextUtility" . | grep -v "\\.format(" | grep -v "CliLogger.java"
+1753194113276:find . -name "*.java" -type f -exec sed -i -E 's/(TextUtility\\.of\\([^)]+\\)(\\.[a-zA-Z]+\\([^)]*\\))*)(;|\\.toString\\(\\))/\\1.format()\\3/g' {} \\;
+1753194116269:grep -rn --include="*.java" "TextUtility" . | grep -v "\\.format(" | grep -v "CliLogger.java"
+1753194208816:grep -rn --include="*.java" "TextUtility" . | grep -v "\\.format(" | grep -v "CliLogger.java" | while IFS=: read -r file line content; do echo "$file:$line:$content"; done
+1753194325076:status
+1753194329835:help
+1753194336283:clear
+1753194345605:commit "fixed the logging"

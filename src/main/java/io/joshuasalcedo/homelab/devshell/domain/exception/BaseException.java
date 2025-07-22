@@ -1,7 +1,7 @@
 package io.joshuasalcedo.homelab.devshell.domain.exception;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.joshuasalcedo.homelab.devshell.utils.CliLogger;
+
 
 /**
  * Base exception class for domain-related errors.
@@ -23,7 +23,6 @@ public abstract class BaseException extends RuntimeException {
   private static final boolean ANSI_SUPPORTED = !System.getProperty("os.name").toLowerCase().contains("win")
           || System.getenv("TERM") != null;
 
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final String errorCode;
   private final transient Object[] errorDetails;
 
@@ -63,14 +62,14 @@ public abstract class BaseException extends RuntimeException {
     String formattedMessage = formatErrorMessage(message);
 
     if (cause != null) {
-      logger.error(formattedMessage, cause);
+      CliLogger.error(formattedMessage, cause);
     } else {
-      logger.error(formattedMessage);
+      CliLogger.error(formattedMessage);
     }
 
     // Log additional details if provided
     if (errorDetails != null && errorDetails.length > 0) {
-      logger.error("Error details: {}", errorDetails);
+      CliLogger.error("Error details: {}", errorDetails);
     }
   }
 

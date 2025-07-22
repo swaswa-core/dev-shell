@@ -1,9 +1,9 @@
 package io.joshuasalcedo.homelab.devshell.configuration;
 
+import io.joshuasalcedo.homelab.devshell.utils.CliLogger;
+
 import io.joshuasalcedo.commonlibs.text.TextUtility;
 import io.joshuasalcedo.homelab.devshell.domain.service.InteractiveCommandService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.shell.result.CommandNotFoundMessageProvider;
 import org.zeroturnaround.exec.ProcessExecutor;
 import org.zeroturnaround.exec.stream.LogOutputStream;
@@ -26,7 +26,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class CommandNotFoundMessageProviderImpl implements CommandNotFoundMessageProvider {
     
-    private static final Logger logger = LoggerFactory.getLogger(CommandNotFoundMessageProviderImpl.class);
     PrintStream out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
 
 
@@ -88,7 +87,7 @@ public class CommandNotFoundMessageProviderImpl implements CommandNotFoundMessag
                                   errorText.contains("input must be provided"))) {
                 // Suggest registering as interactive command
                 String baseCommand = text.split("\\s+")[0];
-                logger.debug("Command failed with TTY error: {}", text);
+                CliLogger.debug("Command failed with TTY error: {}", text);
                 return formatError(String.format(
                     "Command '%s' requires TTY/interactive mode. Register it with: command-iadd \"%s\"", 
                     baseCommand, baseCommand
@@ -103,7 +102,7 @@ public class CommandNotFoundMessageProviderImpl implements CommandNotFoundMessag
             }
             
         } catch (IOException e) {
-            logger.debug("Command not found: {}", text, e);
+            CliLogger.debug("Command not found: {}", text, e);
             String baseCommand = text.split("\\s+")[0];
             // Command not found - show error message with suggestion
             return formatError(String.format(
@@ -115,7 +114,7 @@ public class CommandNotFoundMessageProviderImpl implements CommandNotFoundMessag
             return formatError("Command interrupted");
 
         }catch (Exception e){
-            logger.debug("Failed to execute system command: {}", text, e);
+            CliLogger.debug("Failed to execute system command: {}", text, e);
             return formatError(String.format("Failed to execute command: %s", e.getMessage()));
         }
     }
@@ -152,7 +151,7 @@ public class CommandNotFoundMessageProviderImpl implements CommandNotFoundMessag
                 return formatError(String.format("Interactive command exited with code %d", exitCode));
             }
         } catch (IOException e) {
-            logger.debug("Failed to execute interactive command: {}", command, e);
+            CliLogger.debug("Failed to execute interactive command: {}", command, e);
             return formatError(String.format("Failed to execute interactive command: %s", e.getMessage()));
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

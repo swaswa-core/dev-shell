@@ -1,12 +1,12 @@
 package io.joshuasalcedo.homelab.devshell.domain.service;
 
+import io.joshuasalcedo.homelab.devshell.utils.CliLogger;
+
 import io.joshuasalcedo.homelab.devshell.domain.exception.DomainExceptions;
 import io.joshuasalcedo.homelab.devshell.domain.model.*;
 import io.joshuasalcedo.homelab.devshell.domain.repository.GitRepository;
 import io.joshuasalcedo.homelab.devshell.domain.value.BranchName;
 import io.joshuasalcedo.homelab.devshell.domain.value.CommitMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 
@@ -18,7 +18,6 @@ import java.util.Objects;
  * @created 7/22/2025
  */
 public class SmartCommitService {
-    private static final Logger logger = LoggerFactory.getLogger(SmartCommitService.class);
     
     private final GitRepository gitRepository;
     private final GitValidationService validationService;
@@ -39,7 +38,7 @@ public class SmartCommitService {
      * @throws DomainExceptions.NoChangesToCommitException if no changes to commit
      */
     public Commit executeSmartCommit(Repository repository, String message) {
-        logger.info("Starting smart commit workflow for repository: {}", repository.getName());
+        CliLogger.info("Starting smart commit workflow for repository: {}", repository.getName());
         
         // Validate inputs
         if (message == null || message.trim().isEmpty()) {
@@ -63,7 +62,7 @@ public class SmartCommitService {
         // Step 3: Create temporary branch
         BranchName tempBranchName = BranchName.temporary();
         Branch tempBranch = gitRepository.createBranch(repository, tempBranchName);
-        logger.info("Created temporary branch: {}", tempBranchName);
+        CliLogger.info("Created temporary branch: {}", tempBranchName);
         
         try {
             // Step 4: Switch to temporary branch
@@ -76,7 +75,7 @@ public class SmartCommitService {
             WorkingDirectory currentWorkingDir = gitRepository.getWorkingDirectoryStatus(repository);
             if (!currentWorkingDir.getUntrackedFiles().isEmpty()) {
                 gitRepository.stageFiles(repository, currentWorkingDir.getUntrackedFiles());
-                logger.info("Staged {} untracked files", currentWorkingDir.getUntrackedFiles().size());
+                CliLogger.info("Staged {} untracked files", currentWorkingDir.getUntrackedFiles().size());
             }
             
             // Step 6: Get updated working directory status to get file list
@@ -90,31 +89,31 @@ public class SmartCommitService {
             
             // Step 8: Commit on temporary branch
             Commit commit = gitRepository.createCommit(repository, enhancedMessage, tempBranch.getName());
-            logger.info("Created commit on temporary branch: {}", commit.getHash());
+            CliLogger.info("Created commit on temporary branch: {}", commit.getHash());
             
             // Step 9: Switch back to original branch
             gitRepository.switchToBranch(repository, currentBranch);
             
             // Step 10: Merge temporary branch
             gitRepository.mergeBranch(repository, tempBranch, currentBranch);
-            logger.info("Merged temporary branch into: {}", currentBranch.getName());
+            CliLogger.info("Merged temporary branch into: {}", currentBranch.getName());
             
             // Step 11: Delete temporary branch
             gitRepository.deleteBranch(repository, tempBranch);
-            logger.info("Deleted temporary branch: {}", tempBranchName);
+            CliLogger.info("Deleted temporary branch: {}", tempBranchName);
             
-            logger.info("Smart commit workflow completed successfully");
+            CliLogger.info("Smart commit workflow completed successfully");
             return commit;
             
         } catch (Exception e) {
-            logger.error("Smart commit workflow failed, attempting cleanup", e);
+            CliLogger.error("Smart commit workflow failed, attempting cleanup", e);
             
             // Cleanup: try to switch back to original branch and delete temp branch
             try {
                 gitRepository.switchToBranch(repository, currentBranch);
                 gitRepository.deleteBranch(repository, tempBranch);
             } catch (Exception cleanupException) {
-                logger.warn("Cleanup failed after smart commit error", cleanupException);
+                CliLogger.warn("Cleanup failed after smart commit error", cleanupException);
             }
             
             throw e;
@@ -131,9 +130,9 @@ public class SmartCommitService {
             try {
                 Branch currentBranch = gitRepository.getCurrentBranch(repository);
                 gitRepository.pushBranch(repository, currentBranch);
-                logger.info("Pushed changes to remote repository");
+                CliLogger.info("Pushed changes to remote repository");
             } catch (RuntimeException e) {
-                logger.warn("Failed to push to remote repository", e);
+                CliLogger.warn("Failed to push to remote repository", e);
                 // Re-throw push failures so they can be handled by the caller
                 throw e;
             }

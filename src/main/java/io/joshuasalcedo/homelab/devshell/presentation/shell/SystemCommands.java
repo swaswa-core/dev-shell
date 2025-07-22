@@ -1,7 +1,7 @@
 package io.joshuasalcedo.homelab.devshell.presentation.shell;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.joshuasalcedo.homelab.devshell.utils.CliLogger;
+
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
@@ -22,7 +22,6 @@ import java.util.stream.Stream;
  */
 @ShellComponent
 public class SystemCommands {
-    private static final Logger logger = LoggerFactory.getLogger(SystemCommands.class);
 
     /**
      * Shows current working directory
@@ -35,7 +34,7 @@ public class SystemCommands {
             
             return String.format("📂 Current directory: %s", currentPath.toAbsolutePath());
         } catch (Exception e) {
-            logger.error("Error getting current directory", e);
+            CliLogger.error("Error getting current directory", e);
             return "❌ Error: Could not determine current directory";
         }
     }
@@ -84,7 +83,7 @@ public class SystemCommands {
             
             return String.format("📂 Changed to: %s", targetPath.toAbsolutePath());
         } catch (Exception e) {
-            logger.error("Error changing directory", e);
+            CliLogger.error("Error changing directory", e);
             return String.format("❌ Error changing directory: %s", e.getMessage());
         }
     }
@@ -149,7 +148,7 @@ public class SystemCommands {
             
             return result.toString();
         } catch (IOException e) {
-            logger.error("Error listing directory", e);
+            CliLogger.error("Error listing directory", e);
             return String.format("❌ Error listing directory: %s", e.getMessage());
         }
     }

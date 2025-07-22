@@ -1,9 +1,10 @@
 package io.joshuasalcedo.homelab.devshell.infrastructure.command;
 
+import io.joshuasalcedo.homelab.devshell.utils.CliLogger;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import io.joshuasalcedo.commonlibs.logging.api.Logger;
 import io.joshuasalcedo.homelab.devshell.domain.model.InteractiveCommand;
 import io.joshuasalcedo.homelab.devshell.domain.repository.InteractiveCommandRepository;
 import org.jetbrains.annotations.NotNull;
@@ -56,10 +57,10 @@ public class FileInteractiveCommandRepositoryAdapter implements InteractiveComma
             // Create the file with empty array if it doesn't exist
             if (!Files.exists(path)) {
                 writeCommands(new ArrayList<>());
-                Logger.info("Created new commands file at: {}", filePath);
+                CliLogger.info("Created new commands file at: {}", filePath);
             }
         } catch (IOException e) {
-            Logger.error("Failed to initialize commands file at {}: {}", filePath, e.getMessage());
+            CliLogger.error("Failed to initialize commands file at {}: {}", filePath, e.getMessage());
             throw new RuntimeException("Could not initialize commands file", e);
         }
     }
@@ -121,7 +122,7 @@ public class FileInteractiveCommandRepositoryAdapter implements InteractiveComma
             }
             
             writeCommands(commands);
-            Logger.info("Saved command: {}", command.getCommandName());
+            CliLogger.info("Saved command: {}", command.getCommandName());
         } finally {
             lock.writeLock().unlock();
         }
@@ -138,9 +139,9 @@ public class FileInteractiveCommandRepositoryAdapter implements InteractiveComma
             
             if (removed) {
                 writeCommands(commands);
-                Logger.info("Deleted command: {}", interactiveCommand.getCommandName());
+                CliLogger.info("Deleted command: {}", interactiveCommand.getCommandName());
             } else {
-                Logger.warn("Command not found for deletion: {}", interactiveCommand.getCommandName());
+                CliLogger.warn("Command not found for deletion: {}", interactiveCommand.getCommandName());
             }
         } finally {
             lock.writeLock().unlock();
@@ -153,13 +154,13 @@ public class FileInteractiveCommandRepositoryAdapter implements InteractiveComma
             List<InteractiveCommand> commands = gson.fromJson(reader, commandListType);
             return commands != null ? commands : new ArrayList<>();
         } catch (FileNotFoundException e) {
-            Logger.warn("Commands file not found, returning empty list");
+            CliLogger.warn("Commands file not found, returning empty list");
             return new ArrayList<>();
         } catch (IOException e) {
-            Logger.error("Error reading commands file: {}", e.getMessage());
+            CliLogger.error("Error reading commands file: {}", e.getMessage());
             throw new RuntimeException("Failed to read commands", e);
         } catch (Exception e) {
-            Logger.error("Error parsing commands JSON: {}", e.getMessage());
+            CliLogger.error("Error parsing commands JSON: {}", e.getMessage());
             return new ArrayList<>();
         }
     }
@@ -169,7 +170,7 @@ public class FileInteractiveCommandRepositoryAdapter implements InteractiveComma
             gson.toJson(commands, commandListType, writer);
             writer.flush();
         } catch (IOException e) {
-            Logger.error("Error writing commands to file: {}", e.getMessage());
+            CliLogger.error("Error writing commands to file: {}", e.getMessage());
             throw new RuntimeException("Failed to write commands", e);
         }
     }
@@ -190,7 +191,7 @@ public class FileInteractiveCommandRepositoryAdapter implements InteractiveComma
             
             if (removed) {
                 writeCommands(commands);
-                Logger.info("Deleted command by name: {}", commandName);
+                CliLogger.info("Deleted command by name: {}", commandName);
             }
             
             return removed;
@@ -216,7 +217,7 @@ public class FileInteractiveCommandRepositoryAdapter implements InteractiveComma
         lock.writeLock().lock();
         try {
             writeCommands(new ArrayList<>());
-            Logger.info("Deleted all commands");
+            CliLogger.info("Deleted all commands");
         } finally {
             lock.writeLock().unlock();
         }

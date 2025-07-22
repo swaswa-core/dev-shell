@@ -1,5 +1,7 @@
 package io.joshuasalcedo.homelab.devshell.presentation.shell;
 
+import io.joshuasalcedo.homelab.devshell.utils.CliLogger;
+
 import io.joshuasalcedo.homelab.devshell.domain.exception.DomainExceptions;
 import io.joshuasalcedo.homelab.devshell.domain.model.Commit;
 import io.joshuasalcedo.homelab.devshell.domain.model.Repository;
@@ -8,8 +10,6 @@ import io.joshuasalcedo.homelab.devshell.domain.repository.GitRepository;
 import io.joshuasalcedo.homelab.devshell.domain.service.GitValidationService;
 import io.joshuasalcedo.homelab.devshell.domain.service.SmartCommitService;
 import io.joshuasalcedo.homelab.devshell.domain.value.Author;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
@@ -32,7 +32,6 @@ import java.util.Scanner;
  */
 @ShellComponent
 public class GitCommands {
-    private static final Logger logger = LoggerFactory.getLogger(GitCommands.class);
     
     private final SmartCommitService smartCommitService;
     private final GitRepository gitRepository;
@@ -71,10 +70,10 @@ public class GitCommands {
                     validationService.validateAuthor(Author.fromGitFormat(authorString), repository);
                 }
             } catch (Exception e) {
-                logger.warn("Could not validate author: {}", e.getMessage());
+                CliLogger.warn("Could not validate author: {}", e.getMessage());
             }
             
-            logger.info("Executing smart commit with message: '{}'", message);
+            CliLogger.info("Executing smart commit with message: '{}'", message);
             
             // If push is requested, validate remote repository
             if (push) {
@@ -127,10 +126,10 @@ public class GitCommands {
                        "\n💡 You can push manually later with: git push origin " + 
                        gitRepository.getCurrentBranch(findCurrentRepository()).getName();
             }
-            logger.error("Unexpected error during smart commit", e);
+            CliLogger.error("Unexpected error during smart commit", e);
             return "❌ Unexpected error: " + e.getMessage();
         } catch (Exception e) {
-            logger.error("Unexpected error during smart commit", e);
+            CliLogger.error("Unexpected error during smart commit", e);
             return "❌ Unexpected error: " + e.getMessage();
         }
     }
@@ -146,7 +145,7 @@ public class GitCommands {
             // Validate repository using validation service
             validationService.validateRepository(repository);
             
-            logger.debug("Checking status for repository at: {}", repository.getRootPath());
+            CliLogger.debug("Checking status for repository at: {}", repository.getRootPath());
             
             WorkingDirectory workingDir = gitRepository.getWorkingDirectoryStatus(repository);
             
@@ -188,7 +187,7 @@ public class GitCommands {
         } catch (DomainExceptions.NotARepositoryException e) {
             return "❌ Error: Not a git repository. Please run 'git init' first or navigate to a git repository.";
         } catch (Exception e) {
-            logger.error("Error getting repository status", e);
+            CliLogger.error("Error getting repository status", e);
             return "❌ Error getting status: " + e.getMessage();
         }
     }
@@ -208,7 +207,7 @@ public class GitCommands {
                 repository.getName(), repository.getRootPath());
                 
         } catch (Exception e) {
-            logger.error("Error initializing repository", e);
+            CliLogger.error("Error initializing repository", e);
             return "❌ Error initializing repository: " + e.getMessage();
         }
     }
@@ -245,7 +244,7 @@ public class GitCommands {
         } catch (DomainExceptions.NotARepositoryException e) {
             return "❌ Error: Not a git repository";
         } catch (Exception e) {
-            logger.error("Error getting commit history", e);
+            CliLogger.error("Error getting commit history", e);
             return "❌ Error getting history: " + e.getMessage();
         }
     }
@@ -306,7 +305,7 @@ public class GitCommands {
         } catch (DomainExceptions.NotARepositoryException e) {
             return "❌ Error: Not a git repository. Please run 'git init' first or navigate to a git repository.";
         } catch (Exception e) {
-            logger.error("Error validating repository", e);
+            CliLogger.error("Error validating repository", e);
             return "❌ Validation error: " + e.getMessage();
         }
     }
@@ -341,7 +340,7 @@ public class GitCommands {
                 "💡 You can now use 'commit --push' to push to remote repositories", configuredAuthor);
                 
         } catch (Exception e) {
-            logger.error("Failed to configure git", e);
+            CliLogger.error("Failed to configure git", e);
             return "❌ Failed to configure git: " + e.getMessage() + 
                    "\n💡 You can also configure manually with:\n" +
                    "   git config user.name \"" + name + "\"\n" +
@@ -430,7 +429,7 @@ public class GitCommands {
                 configuredAuthor);
                 
         } catch (Exception e) {
-            logger.error("Failed to configure git authentication", e);
+            CliLogger.error("Failed to configure git authentication", e);
             return "❌ Failed to configure git authentication: " + e.getMessage();
         }
     }
@@ -462,7 +461,7 @@ public class GitCommands {
                     if (untrackedFiles.contains(file)) {
                         filesToAdd.add(file);
                     } else {
-                        logger.warn("File {} is not untracked, skipping", file);
+                        CliLogger.warn("File {} is not untracked, skipping", file);
                     }
                 }
             } else {
@@ -495,7 +494,7 @@ public class GitCommands {
             return result.toString();
             
         } catch (Exception e) {
-            logger.error("Error adding files", e);
+            CliLogger.error("Error adding files", e);
             return "❌ Error adding files: " + e.getMessage();
         }
     }

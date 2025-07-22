@@ -1,5 +1,7 @@
 package io.joshuasalcedo.homelab.devshell.infrastructure.git;
 
+import io.joshuasalcedo.homelab.devshell.utils.CliLogger;
+
 import io.joshuasalcedo.homelab.devshell.domain.exception.DomainExceptions;
 import io.joshuasalcedo.homelab.devshell.domain.model.*;
 import io.joshuasalcedo.homelab.devshell.domain.repository.GitRepository;
@@ -15,8 +17,6 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.RemoteConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -38,14 +38,13 @@ import java.util.stream.Collectors;
  */
 @Component
 public class JGitRepositoryAdapter implements GitRepository {
-    private static final Logger logger = LoggerFactory.getLogger(JGitRepositoryAdapter.class);
 
     @Override
     public Optional<io.joshuasalcedo.homelab.devshell.domain.model.Repository> findRepository(Path repositoryPath) {
         try {
             File gitDir = repositoryPath.resolve(".git").toFile();
             if (!gitDir.exists()) {
-                logger.debug("No .git directory found at: {}", repositoryPath);
+                CliLogger.debug("No .git directory found at: {}", repositoryPath);
                 return Optional.empty();
             }
 
@@ -68,7 +67,7 @@ public class JGitRepositoryAdapter implements GitRepository {
             return Optional.empty();
 
         } catch (IOException e) {
-            logger.debug("Error checking repository at {}: {}", repositoryPath, e.getMessage());
+            CliLogger.debug("Error checking repository at {}: {}", repositoryPath, e.getMessage());
             return Optional.empty();
         }
     }
@@ -100,7 +99,7 @@ public class JGitRepositoryAdapter implements GitRepository {
                         Process pEmail = pbEmail.start();
                         pEmail.waitFor();
                     } catch (InterruptedException ie) {
-                        logger.warn("Interrupted while configuring git user: {}", ie.getMessage());
+                        CliLogger.warn("Interrupted while configuring git user: {}", ie.getMessage());
                         Thread.currentThread().interrupt(); // Restore the interrupted status
                     }
                 }
@@ -119,12 +118,12 @@ public class JGitRepositoryAdapter implements GitRepository {
 
             git.close();
 
-            logger.info("Initialized git repository at: {}", repositoryPath);
+            CliLogger.info("Initialized git repository at: {}", repositoryPath);
             return io.joshuasalcedo.homelab.devshell.domain.model.Repository.existing(
                 repositoryPath, repositoryName, false, "main");
 
         } catch (GitAPIException | IOException e) {
-            logger.error("Failed to initialize repository at {}: {}", repositoryPath, e.getMessage());
+            CliLogger.error("Failed to initialize repository at {}: {}", repositoryPath, e.getMessage());
             throw new DomainExceptions.NotARepositoryException(repositoryPath.toString(), e);
         }
     }
@@ -144,14 +143,14 @@ public class JGitRepositoryAdapter implements GitRepository {
             List<String> untrackedFiles = new ArrayList<>(status.getUntracked());
 
             // Debug logging
-            logger.debug("Git Status - Added: {}, Changed: {}, Removed: {}, Modified: {}, Missing: {}, Untracked: {}", 
+            CliLogger.debug("Git Status - Added: {}, Changed: {}, Removed: {}, Modified: {}, Missing: {}, Untracked: {}", 
                 status.getAdded().size(), status.getChanged().size(), status.getRemoved().size(),
                 status.getModified().size(), status.getMissing().size(), status.getUntracked().size());
 
             return WorkingDirectory.withChanges(stagedFiles, unstagedFiles, untrackedFiles);
 
         } catch (GitAPIException | IOException e) {
-            logger.error("Failed to get working directory status: {}", e.getMessage());
+            CliLogger.error("Failed to get working directory status: {}", e.getMessage());
             throw new RuntimeException("Failed to get repository status", e);
         }
     }
@@ -165,7 +164,7 @@ public class JGitRepositoryAdapter implements GitRepository {
             return Branch.current(branchName, commitHash);
 
         } catch (IOException e) {
-            logger.error("Failed to get current branch: {}", e.getMessage());
+            CliLogger.error("Failed to get current branch: {}", e.getMessage());
             throw new RuntimeException("Failed to get current branch", e);
         }
     }
@@ -186,7 +185,7 @@ public class JGitRepositoryAdapter implements GitRepository {
                 .collect(Collectors.toList());
 
         } catch (GitAPIException | IOException e) {
-            logger.error("Failed to get branches: {}", e.getMessage());
+            CliLogger.error("Failed to get branches: {}", e.getMessage());
             throw new RuntimeException("Failed to get branches", e);
         }
     }
@@ -202,7 +201,7 @@ public class JGitRepositoryAdapter implements GitRepository {
             return Branch.temporary(branchName.getValue(), commitHash);
 
         } catch (GitAPIException | IOException e) {
-            logger.error("Failed to create branch {}: {}", branchName, e.getMessage());
+            CliLogger.error("Failed to create branch {}: {}", branchName, e.getMessage());
             throw new RuntimeException("Failed to create branch: " + branchName, e);
         }
     }
@@ -214,10 +213,10 @@ public class JGitRepositoryAdapter implements GitRepository {
                 .setName(branch.getName())
                 .call();
 
-            logger.debug("Switched to branch: {}", branch.getName());
+            CliLogger.debug("Switched to branch: {}", branch.getName());
 
         } catch (GitAPIException | IOException e) {
-            logger.error("Failed to switch to branch {}: {}", branch.getName(), e.getMessage());
+            CliLogger.error("Failed to switch to branch {}: {}", branch.getName(), e.getMessage());
             throw new RuntimeException("Failed to switch to branch: " + branch.getName(), e);
         }
     }
@@ -230,10 +229,10 @@ public class JGitRepositoryAdapter implements GitRepository {
                 .setForce(true)
                 .call();
 
-            logger.debug("Deleted branch: {}", branch.getName());
+            CliLogger.debug("Deleted branch: {}", branch.getName());
 
         } catch (GitAPIException | IOException e) {
-            logger.error("Failed to delete branch {}: {}", branch.getName(), e.getMessage());
+            CliLogger.error("Failed to delete branch {}: {}", branch.getName(), e.getMessage());
             throw new RuntimeException("Failed to delete branch: " + branch.getName(), e);
         }
     }
@@ -252,10 +251,10 @@ public class JGitRepositoryAdapter implements GitRepository {
                 git.rm().addFilepattern(missing).call();
             }
 
-            logger.debug("Staged all tracked files");
+            CliLogger.debug("Staged all tracked files");
 
         } catch (GitAPIException | IOException e) {
-            logger.error("Failed to stage tracked files: {}", e.getMessage());
+            CliLogger.error("Failed to stage tracked files: {}", e.getMessage());
             throw new RuntimeException("Failed to stage tracked files", e);
         }
     }
@@ -267,10 +266,10 @@ public class JGitRepositoryAdapter implements GitRepository {
                 git.add().addFilepattern(file).call();
             }
 
-            logger.debug("Staged {} files", files.size());
+            CliLogger.debug("Staged {} files", files.size());
 
         } catch (GitAPIException | IOException e) {
-            logger.error("Failed to stage files: {}", e.getMessage());
+            CliLogger.error("Failed to stage files: {}", e.getMessage());
             throw new RuntimeException("Failed to stage files", e);
         }
     }
@@ -308,7 +307,7 @@ public class JGitRepositoryAdapter implements GitRepository {
             );
 
         } catch (GitAPIException | IOException e) {
-            logger.error("Failed to create commit: {}", e.getMessage());
+            CliLogger.error("Failed to create commit: {}", e.getMessage());
             throw new RuntimeException("Failed to create commit", e);
         }
     }
@@ -326,10 +325,10 @@ public class JGitRepositoryAdapter implements GitRepository {
                 .setMessage("Merge branch '" + sourceBranch.getName() + "' into " + targetBranch.getName())
                 .call();
 
-            logger.debug("Merged branch {} into {}", sourceBranch.getName(), targetBranch.getName());
+            CliLogger.debug("Merged branch {} into {}", sourceBranch.getName(), targetBranch.getName());
 
         } catch (GitAPIException | IOException e) {
-            logger.error("Failed to merge branch {} into {}: {}", 
+            CliLogger.error("Failed to merge branch {} into {}: {}", 
                 sourceBranch.getName(), targetBranch.getName(), e.getMessage());
             throw new RuntimeException("Failed to merge branches", e);
         }
@@ -344,7 +343,7 @@ public class JGitRepositoryAdapter implements GitRepository {
                 .anyMatch(ref -> ref.getName().equals("refs/heads/" + branch.getName()));
 
             if (!branchExists) {
-                logger.error("Branch {} does not exist locally", branch.getName());
+                CliLogger.error("Branch {} does not exist locally", branch.getName());
                 throw new RuntimeException("Cannot push branch '" + branch.getName() + "' because it does not exist locally. " +
                     "Make sure you have created and committed to this branch first.");
             }
@@ -355,20 +354,20 @@ public class JGitRepositoryAdapter implements GitRepository {
                 .add(branch.getName())
                 .call();
 
-            logger.debug("Pushed branch {} to origin", branch.getName());
+            CliLogger.debug("Pushed branch {} to origin", branch.getName());
 
         } catch (org.eclipse.jgit.api.errors.TransportException e) {
             if (e.getMessage().contains("Authentication is required") || e.getMessage().contains("CredentialsProvider")) {
-                logger.error("Push failed due to authentication: {}", e.getMessage());
+                CliLogger.error("Push failed due to authentication: {}", e.getMessage());
                 throw new RuntimeException("Push failed: Git credentials not configured. " +
                     "Please configure your git credentials (git config --global user.name/user.email) " +
                     "or use SSH keys for authentication.", e);
             } else {
-                logger.error("Push failed due to transport error: {}", e.getMessage());
+                CliLogger.error("Push failed due to transport error: {}", e.getMessage());
                 throw new RuntimeException("Push failed: " + e.getMessage(), e);
             }
         } catch (GitAPIException | IOException e) {
-            logger.error("Failed to push branch {}: {}", branch.getName(), e.getMessage());
+            CliLogger.error("Failed to push branch {}: {}", branch.getName(), e.getMessage());
             throw new RuntimeException("Failed to push branch: " + branch.getName() + ". " + e.getMessage(), e);
         }
     }
@@ -403,7 +402,7 @@ public class JGitRepositoryAdapter implements GitRepository {
             return commits;
 
         } catch (GitAPIException | IOException e) {
-            logger.error("Failed to get commit history: {}", e.getMessage());
+            CliLogger.error("Failed to get commit history: {}", e.getMessage());
             throw new RuntimeException("Failed to get commit history", e);
         }
     }
@@ -424,7 +423,7 @@ public class JGitRepositoryAdapter implements GitRepository {
             return name + " <" + email + ">";
 
         } catch (IOException e) {
-            logger.warn("Failed to get configured author: {}", e.getMessage());
+            CliLogger.warn("Failed to get configured author: {}", e.getMessage());
             return "Unknown User <user@unknown.com>";
         }
     }
@@ -440,7 +439,7 @@ public class JGitRepositoryAdapter implements GitRepository {
         try (Git git = openGit(repository.getRootPath())) {
             return getRemotes(repository.getRootPath(), git.getRepository());
         } catch (IOException e) {
-            logger.error("Failed to get remotes: {}", e.getMessage());
+            CliLogger.error("Failed to get remotes: {}", e.getMessage());
             return List.of();
         }
     }
@@ -467,7 +466,7 @@ public class JGitRepositoryAdapter implements GitRepository {
                 .map(RemoteConfig::getName)
                 .collect(Collectors.toList());
         } catch (Exception e) {
-            logger.debug("Failed to get remotes for {}: {}", repositoryPath, e.getMessage());
+            CliLogger.debug("Failed to get remotes for {}: {}", repositoryPath, e.getMessage());
             return List.of();
         }
     }
