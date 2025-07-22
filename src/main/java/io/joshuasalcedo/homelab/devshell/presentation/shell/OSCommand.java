@@ -2,8 +2,8 @@ package io.joshuasalcedo.homelab.devshell.presentation.shell;
 
 
 import io.joshuasalcedo.commonlibs.text.TextUtility;
-import io.joshuasalcedo.homelab.devshell.infrastructure.InteractiveCommand;
-import io.joshuasalcedo.homelab.devshell.infrastructure.InteractiveCommandService;
+import io.joshuasalcedo.homelab.devshell.domain.model.InteractiveCommand;
+import io.joshuasalcedo.homelab.devshell.domain.service.InteractiveCommandService;
 import io.joshuasalcedo.homelab.devshell.utils.AliasSetter;
 import org.jline.reader.LineReader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,11 +27,12 @@ public class OSCommand {
 
     private final LineReader lineReader;
     
-    @Autowired
-    private InteractiveCommandService interactiveCommandService;
 
-    public OSCommand(@Lazy LineReader lineReader) {
+    private final InteractiveCommandService interactiveCommandService;
+
+    public OSCommand(@Lazy LineReader lineReader, InteractiveCommandService interactiveCommandService) {
         this.lineReader = lineReader;
+        this.interactiveCommandService = interactiveCommandService;
     }
 
     @ShellMethod(key = "set-alias", value = "Set alias for the dev-cli app.")

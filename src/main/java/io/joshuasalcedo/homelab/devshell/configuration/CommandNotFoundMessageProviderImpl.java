@@ -1,10 +1,9 @@
 package io.joshuasalcedo.homelab.devshell.configuration;
 
 import io.joshuasalcedo.commonlibs.text.TextUtility;
-import io.joshuasalcedo.homelab.devshell.infrastructure.InteractiveCommandService;
+import io.joshuasalcedo.homelab.devshell.domain.service.InteractiveCommandService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.result.CommandNotFoundMessageProvider;
 import org.zeroturnaround.exec.ProcessExecutor;
 import org.zeroturnaround.exec.stream.LogOutputStream;
@@ -37,22 +36,12 @@ public class CommandNotFoundMessageProviderImpl implements CommandNotFoundMessag
         this.interactiveCommandService = interactiveCommandService;
     }
 
-    private void initializeDefaultCommands() {
-        List<String> defaultCommands = Arrays.asList(
-                "nano", "vim", "vi", "emacs", "less", "more",
-                "htop", "top", "ssh", "telnet", "mysql", "psql",
-                "python", "python3", "node", "claude"
-        );
 
-        defaultCommands.forEach(interactiveCommandService::registerCommand);
-    }
 
     @Override
     public String apply(ProviderContext providerContext) {
         String text = providerContext.text().trim();
-        if(!interactiveCommandService.isInteractiveCommand("nano")){
-            initializeDefaultCommands();
-        }
+
         if (text.isEmpty()) {
             return formatError("Empty command");
         }
@@ -65,9 +54,9 @@ public class CommandNotFoundMessageProviderImpl implements CommandNotFoundMessag
         // Try to execute as a regular command with streaming output
         StringBuilder errorOutput = new StringBuilder();
         try {
-            // Execute the command with streaming output
+            // Execute the command with streaming output using login shell to source profile
             int exitCode = new ProcessExecutor()
-                    .command("/bin/bash", "-c", text)
+                    .command("/bin/bash", "-l", "-c", text)
                     .directory(new File(System.getProperty("user.dir")))
                     .timeout(30, TimeUnit.SECONDS) // 30 second timeout
                     .redirectOutput(new LogOutputStream() {
@@ -132,7 +121,7 @@ public class CommandNotFoundMessageProviderImpl implements CommandNotFoundMessag
     }
     
     private String formatError(String message) {
-        return TextUtility.of("❌ " + message)
+        return TextUtility.of(message)
                 .bold()
                 .color(TextUtility.Color.RED)
                 .format();
@@ -149,8 +138,8 @@ public class CommandNotFoundMessageProviderImpl implements CommandNotFoundMessag
             // Clear any previous error output and show retrying message
             out.println(formatInfo("🔄 Retrying as interactive command..."));
             
-            // Use ProcessBuilder to inherit IO for interactive commands
-            ProcessBuilder pb = new ProcessBuilder("/bin/bash", "-c", command);
+            // Use ProcessBuilder to inherit IO for interactive commands with login shell
+            ProcessBuilder pb = new ProcessBuilder("/bin/bash", "-l", "-c", command);
             pb.directory(new File(System.getProperty("user.dir")));
             pb.inheritIO(); // This allows the subprocess to use the parent's stdin/stdout/stderr
             

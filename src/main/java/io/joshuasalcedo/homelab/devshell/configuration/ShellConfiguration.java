@@ -2,8 +2,7 @@ package io.joshuasalcedo.homelab.devshell.configuration;
 
 import io.joshuasalcedo.commonlibs.text.BannerGenerator;
 import io.joshuasalcedo.commonlibs.text.TextUtility;
-import io.joshuasalcedo.homelab.devshell.infrastructure.InteractiveCommandService;
-import org.springframework.beans.factory.annotation.Value;
+import io.joshuasalcedo.homelab.devshell.domain.service.InteractiveCommandService;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,6 +42,11 @@ public class ShellConfiguration {
     @Bean
     public CommandNotFoundMessageProvider commandNotFoundMessageProvider(InteractiveCommandService interactiveCommandService) {
         return new CommandNotFoundMessageProviderImpl(interactiveCommandService);
+    }
+
+    @Bean
+    public PrintStream printStream() {
+        return new PrintStream(System.out, true, StandardCharsets.UTF_8);
     }
 
 
