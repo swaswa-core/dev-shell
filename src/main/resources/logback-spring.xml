@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration>
+<configuration debug="false">
+    <!-- Disable Logback status messages -->
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
     <!-- Define log directory property -->
-    <property name="LOG_DIR" value="logs"/>
+    <property name="LOG_DIR" value="${user.home}/.dev-shell"/>
     <property name="LOG_FILE" value="${LOG_DIR}/dev-shell"/>
     
-    <!-- Console Appender for development -->
+    <!-- Minimal Console Appender for production -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %5level --- [%15.15t] %-40.40logger{39} : %msg%n</pattern>
+            <pattern>%msg%n</pattern>
         </encoder>
-        <!-- Only show INFO and above in console during normal operation -->
+        <!-- Only show ERROR in console for production -->
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>INFO</level>
+            <level>ERROR</level>
         </filter>
     </appender>
     
@@ -62,33 +64,28 @@
         </rollingPolicy>
     </appender>
     
-    <!-- Git operation specific logger -->
-    <logger name="io.joshuasalcedo.homelab.devshell.infrastructure.git" level="DEBUG" additivity="false">
-        <appender-ref ref="FILE"/>
-        <appender-ref ref="CONSOLE"/>
-    </logger>
+    <!-- Silence all Spring Framework logging -->
+    <logger name="org.springframework" level="ERROR"/>
+    <logger name="org.springframework.boot" level="ERROR"/>
+    <logger name="org.springframework.shell" level="ERROR"/>
+    <logger name="org.springframework.context" level="ERROR"/>
+    <logger name="org.springframework.beans" level="ERROR"/>
+    <logger name="org.springframework.core" level="ERROR"/>
     
-    <!-- Domain service logger -->
-    <logger name="io.joshuasalcedo.homelab.devshell.domain.service" level="DEBUG" additivity="false">
-        <appender-ref ref="FILE"/>
-        <appender-ref ref="CONSOLE"/>
-    </logger>
+    <!-- Silence JGit logging -->
+    <logger name="org.eclipse.jgit" level="ERROR"/>
     
-    <!-- Shell commands logger -->
-    <logger name="io.joshuasalcedo.homelab.devshell.presentation.shell" level="DEBUG" additivity="false">
-        <appender-ref ref="FILE"/>
-        <appender-ref ref="CONSOLE"/>
-    </logger>
+    <!-- Silence other common noisy loggers -->
+    <logger name="org.apache" level="ERROR"/>
+    <logger name="org.hibernate" level="ERROR"/>
+    <logger name="com.zaxxer" level="ERROR"/>
+    <logger name="jdk.internal" level="ERROR"/>
     
-    <!-- Spring Shell logger - reduce noise -->
-    <logger name="org.springframework.shell" level="WARN"/>
+    <!-- Application loggers - production level -->
+    <logger name="io.joshuasalcedo.homelab.devshell" level="WARN"/>
     
-    <!-- JGit logger - reduce noise -->
-    <logger name="org.eclipse.jgit" level="WARN"/>
-    
-    <!-- Root logger -->
-    <root level="INFO">
-        <appender-ref ref="CONSOLE"/>
+    <!-- Root logger - production default -->
+    <root level="ERROR">
         <appender-ref ref="FILE"/>
         <appender-ref ref="ERROR_FILE"/>
     </root>
@@ -97,17 +94,8 @@
     <springProfile name="dev,development">
         <!-- More verbose logging in development -->
         <logger name="io.joshuasalcedo.homelab.devshell" level="DEBUG"/>
-        <root level="DEBUG">
+        <root level="INFO">
             <appender-ref ref="CONSOLE"/>
-            <appender-ref ref="FILE"/>
-            <appender-ref ref="ERROR_FILE"/>
-        </root>
-    </springProfile>
-    
-    <springProfile name="prod,production">
-        <!-- Less verbose logging in production -->
-        <logger name="io.joshuasalcedo.homelab.devshell" level="INFO"/>
-        <root level="WARN">
             <appender-ref ref="FILE"/>
             <appender-ref ref="ERROR_FILE"/>
         </root>
@@ -115,7 +103,7 @@
     
     <springProfile name="test">
         <!-- Minimal logging during tests -->
-        <root level="WARN">
+        <root level="ERROR">
             <appender-ref ref="CONSOLE"/>
         </root>
     </springProfile>

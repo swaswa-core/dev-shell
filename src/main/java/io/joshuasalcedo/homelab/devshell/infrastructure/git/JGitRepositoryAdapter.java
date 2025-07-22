@@ -77,8 +77,48 @@ public class JGitRepositoryAdapter implements GitRepository {
     public io.joshuasalcedo.homelab.devshell.domain.model.Repository initializeRepository(Path repositoryPath, String repositoryName) {
         try {
             Files.createDirectories(repositoryPath);
-            Git.init().setDirectory(repositoryPath.toFile()).call();
-            
+            Git git = Git.init().setDirectory(repositoryPath.toFile()).call();
+
+            // Create initial commit to establish the main branch
+            // Create a README.md file if it doesn't exist
+            Path readmePath = repositoryPath.resolve("README.md");
+            if (!Files.exists(readmePath)) {
+                Files.writeString(readmePath, "# " + repositoryName + "\n\nInitialized repository");
+                git.add().addFilepattern("README.md").call();
+
+                // Configure user for initial commit if not already configured
+                if (git.getRepository().getConfig().getString("user", null, "name") == null) {
+                    try {
+                        // Use ProcessBuilder to set git config since JGit doesn't provide a simple way to save config
+                        ProcessBuilder pbName = new ProcessBuilder("git", "config", "user.name", "Dev Shell");
+                        pbName.directory(repositoryPath.toFile());
+                        Process pName = pbName.start();
+                        pName.waitFor();
+
+                        ProcessBuilder pbEmail = new ProcessBuilder("git", "config", "user.email", "dev-shell@example.com");
+                        pbEmail.directory(repositoryPath.toFile());
+                        Process pEmail = pbEmail.start();
+                        pEmail.waitFor();
+                    } catch (InterruptedException ie) {
+                        logger.warn("Interrupted while configuring git user: {}", ie.getMessage());
+                        Thread.currentThread().interrupt(); // Restore the interrupted status
+                    }
+                }
+
+                // Create initial commit to establish the main branch
+                git.commit()
+                   .setMessage("Initial commit")
+                   .call();
+
+                // Rename the default branch to main if it's not already
+                String currentBranch = git.getRepository().getBranch();
+                if (!currentBranch.equals("main")) {
+                    git.branchRename().setOldName(currentBranch).setNewName("main").call();
+                }
+            }
+
+            git.close();
+
             logger.info("Initialized git repository at: {}", repositoryPath);
             return io.joshuasalcedo.homelab.devshell.domain.model.Repository.existing(
                 repositoryPath, repositoryName, false, "main");
@@ -102,7 +142,7 @@ public class JGitRepositoryAdapter implements GitRepository {
             unstagedFiles.addAll(status.getMissing());
 
             List<String> untrackedFiles = new ArrayList<>(status.getUntracked());
-            
+
             // Debug logging
             logger.debug("Git Status - Added: {}, Changed: {}, Removed: {}, Modified: {}, Missing: {}, Untracked: {}", 
                 status.getAdded().size(), status.getChanged().size(), status.getRemoved().size(),
@@ -202,12 +242,12 @@ public class JGitRepositoryAdapter implements GitRepository {
     public void stageTrackedFiles(io.joshuasalcedo.homelab.devshell.domain.model.Repository repository) {
         try (Git git = openGit(repository.getRootPath())) {
             Status status = git.status().call();
-            
+
             // Stage modified and deleted files (tracked files only)
             for (String modified : status.getModified()) {
                 git.add().addFilepattern(modified).call();
             }
-            
+
             for (String missing : status.getMissing()) {
                 git.rm().addFilepattern(missing).call();
             }
@@ -279,7 +319,7 @@ public class JGitRepositoryAdapter implements GitRepository {
         try (Git git = openGit(repository.getRootPath())) {
             // Ensure we're on the target branch
             git.checkout().setName(targetBranch.getName()).call();
-            
+
             // Merge source branch into target
             git.merge()
                 .include(git.getRepository().resolve(sourceBranch.getName()))
@@ -298,6 +338,17 @@ public class JGitRepositoryAdapter implements GitRepository {
     @Override
     public void pushBranch(io.joshuasalcedo.homelab.devshell.domain.model.Repository repository, Branch branch) {
         try (Git git = openGit(repository.getRootPath())) {
+            // Check if the branch exists locally
+            List<Ref> branches = git.branchList().call();
+            boolean branchExists = branches.stream()
+                .anyMatch(ref -> ref.getName().equals("refs/heads/" + branch.getName()));
+
+            if (!branchExists) {
+                logger.error("Branch {} does not exist locally", branch.getName());
+                throw new RuntimeException("Cannot push branch '" + branch.getName() + "' because it does not exist locally. " +
+                    "Make sure you have created and committed to this branch first.");
+            }
+
             // Try to push - if it fails due to authentication, provide a helpful error message
             git.push()
                 .setRemote("origin")
@@ -326,15 +377,15 @@ public class JGitRepositoryAdapter implements GitRepository {
     public List<Commit> getCommitHistory(io.joshuasalcedo.homelab.devshell.domain.model.Repository repository, int maxCount) {
         try (Git git = openGit(repository.getRootPath())) {
             List<Commit> commits = new ArrayList<>();
-            
+
             Iterable<RevCommit> jgitCommits = git.log().setMaxCount(maxCount).call();
-            
+
             for (RevCommit jgitCommit : jgitCommits) {
                 LocalDateTime timestamp = LocalDateTime.ofInstant(
                     Instant.ofEpochSecond(jgitCommit.getCommitTime()), 
                     ZoneId.systemDefault()
                 );
-                
+
                 CommitMessage message = CommitMessage.of(jgitCommit.getFullMessage());
                 String authorString = jgitCommit.getAuthorIdent().getName() + 
                     " <" + jgitCommit.getAuthorIdent().getEmailAddress() + ">";
@@ -348,7 +399,7 @@ public class JGitRepositoryAdapter implements GitRepository {
                     git.getRepository().getBranch()
                 ));
             }
-            
+
             return commits;
 
         } catch (GitAPIException | IOException e) {

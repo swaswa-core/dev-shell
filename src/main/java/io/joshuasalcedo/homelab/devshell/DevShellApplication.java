@@ -7,7 +7,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class DevShellApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(DevShellApplication.class, args);
+        // Configure for minimal startup logging
+        System.setProperty("spring.main.banner-mode", "off");
+        System.setProperty("logging.level.root", "ERROR");
+        System.setProperty("logging.level.org.springframework", "ERROR");
+        
+        SpringApplication app = new SpringApplication(DevShellApplication.class);
+        app.setLogStartupInfo(false);
+        app.run(args);
     }
 
 }
